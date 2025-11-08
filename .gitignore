@@ -1,0 +1,5 @@
+# Environment variables
+.env
+
+# Let's Encrypt certificates and account data
+letsencrypt/acme.json

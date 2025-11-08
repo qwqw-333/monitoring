@@ -1,0 +1,417 @@
+services:
+  traefik:
+    image: traefik
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+      - external
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    environment:
+      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
+      - ACME_EMAIL=${ACME_EMAIL:-your-email@example.com}
+      - DOMAIN=${DOMAIN:-example.duckdns.org}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9000/ping | grep -q OK"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.rule=Host(`traefik-dashboard.${DOMAIN:-example.duckdns.org}`)"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_BASIC_AUTH}"
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik-dashboard.${DOMAIN:-example.duckdns.org}`)"
+      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=duckdns"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=${DOMAIN:-example.duckdns.org}"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.${DOMAIN:-example.duckdns.org}"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+    command:
+      - --api.dashboard=true
+      - --api.insecure=false
+      - --ping=true
+      - --ping.entryPoint=traefik
+      - --log.level=INFO
+      - --accesslog=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entryPoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.asDefault=true
+      - --entrypoints.websecure.http.tls.certresolver=duckdns
+      - --entrypoints.traefik.address=127.0.0.1:9000
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
+      - --providers.docker.exposedByDefault=false
+      - --certificatesresolvers.duckdns.acme.email=${ACME_EMAIL:-your-email@example.com}
+      - --certificatesresolvers.duckdns.acme.storage=/letsencrypt/acme.json # sudo touch /letsencrypt/acme.json && sudo chmod 600 /letsencrypt/acme.json
+      #- --certificatesresolvers.duckdns.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory #Staging to avoid rate limiting, comment out for production
+      - --certificatesresolvers.duckdns.acme.dnschallenge.provider=duckdns
+      - --certificatesresolvers.duckdns.acme.dnschallenge.propagation.disablechecks=true
+      - --certificatesresolvers.duckdns.acme.dnschallenge.propagation.delaybeforechecks=30
+      - --certificatesresolvers.duckdns.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53
+
+  coredns-init:
+    image: alpine:latest
+    container_name: coredns-init
+    restart: "no"
+    environment:
+      - DOMAIN=${DOMAIN:-example.duckdns.org}
+    volumes:
+      - ./coredns/Corefile.template:/Corefile.template:ro
+      - coredns-config:/output
+    command: >
+      sh -c "
+        apk add --no-cache gettext >/dev/null 2>&1 || true &&
+        envsubst < /Corefile.template > /output/Corefile &&
+        echo 'Corefile generated with domain: '$$DOMAIN
+      "
+    networks:
+      - internal
+
+  coredns:
+    image: coredns/coredns:latest
+    container_name: coredns
+    restart: always
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      - coredns-config:/config:ro
+    networks:
+      - internal
+      - external
+    command: -conf /config/Corefile
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/health",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      coredns-init:
+        condition: service_completed_successfully
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=internal"
+      - "traefik.http.routers.kuma.rule=Host(`kuma.${DOMAIN:-example.duckdns.org}`)"
+      - "traefik.http.routers.kuma.entrypoints=websecure"
+      - "traefik.http.routers.kuma.tls=true"
+      - "traefik.http.services.kuma.loadbalancer.server.port=3001"
+    volumes:
+      - uptime-kuma:/app/data
+    networks:
+      - internal
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3001/api/status",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=internal"
+      - "traefik.http.routers.vault.rule=Host(`vault.${DOMAIN:-example.duckdns.org}`)"
+      - "traefik.http.routers.vault.entrypoints=websecure"
+      - "traefik.http.routers.vault.tls=true"
+      - "traefik.http.services.vault.loadbalancer.server.port=80"
+    volumes:
+      - vaultwarden:/data
+    networks:
+      - internal
+    environment:
+      - SIGNUPS_ALLOWED=true
+      - DOMAIN=https://vault.${DOMAIN:-example.duckdns.org}
+      - WEBSOCKET_ENABLED=true
+      - LOG_LEVEL=warn
+      - EXTENDED_LOGGING=true
+      - ROCKET_PORT=80
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:80/alive",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  init-clickhouse:
+    image: clickhouse/clickhouse-server:25.5.6
+    container_name: signoz-init-clickhouse
+    restart: on-failure
+    networks:
+      - internal
+    command:
+      - bash
+      - -c
+      - |
+        version="v0.0.1"
+        node_os=$$(uname -s | tr '[:upper:]' '[:lower:]')
+        node_arch=$$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/)
+        echo "Fetching histogram-binary for $${node_os}/$${node_arch}"
+        cd /tmp
+        wget -O histogram-quantile.tar.gz "https://github.com/SigNoz/signoz/releases/download/histogram-quantile%2F$${version}/histogram-quantile_$${node_os}_$${node_arch}.tar.gz" || echo "Failed to download, continuing..."
+        tar -xvzf histogram-quantile.tar.gz 2>/dev/null || true
+        mkdir -p /var/lib/clickhouse/user_scripts
+        mv histogram-quantile /var/lib/clickhouse/user_scripts/histogramQuantile 2>/dev/null || true
+    volumes:
+      - ./signoz-config/clickhouse/user_scripts:/var/lib/clickhouse/user_scripts/
+
+  zookeeper:
+    image: signoz/zookeeper:3.7.1
+    container_name: signoz-zookeeper
+    user: root
+    restart: unless-stopped
+    networks:
+      - internal
+    volumes:
+      - zookeeper-data:/bitnami/zookeeper
+    environment:
+      - ZOO_SERVER_ID=1
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_AUTOPURGE_INTERVAL=1
+      - ZOO_ENABLE_PROMETHEUS_METRICS=yes
+      - ZOO_PROMETHEUS_METRICS_PORT_NUMBER=9141
+      - ZOO_4LW_COMMANDS_WHITELIST=mntr,srvr,ruok
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "echo mntr | nc -w 1 localhost 2181 | grep zk_server_state || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      options:
+        max-size: 50m
+        max-file: "3"
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.5.6
+    container_name: clickhouse
+    tty: true
+    restart: unless-stopped
+    networks:
+      - internal
+    volumes:
+      - ./signoz-config/clickhouse/config.xml:/etc/clickhouse-server/config.xml:ro
+      - ./signoz-config/clickhouse/users.xml:/etc/clickhouse-server/users.xml:ro
+      - ./signoz-config/clickhouse/custom-function.xml:/etc/clickhouse-server/custom-function.xml:ro
+      - ./signoz-config/clickhouse/user_scripts:/var/lib/clickhouse/user_scripts/:ro
+      - ./signoz-config/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - clickhouse-data:/var/lib/clickhouse/
+    environment:
+      - CLICKHOUSE_SKIP_USER_SETUP=1
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "0.0.0.0:8123/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      init-clickhouse:
+        condition: service_completed_successfully
+      zookeeper:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: 50m
+        max-file: "3"
+
+  schema-migrator-sync:
+    image: signoz/signoz-schema-migrator:v0.129.8
+    container_name: signoz-schema-migrator-sync
+    restart: on-failure
+    networks:
+      - internal
+    command:
+      - sync
+      - --dsn=tcp://clickhouse:9000
+      - --up=
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: 50m
+        max-file: "3"
+
+  schema-migrator-async:
+    image: signoz/signoz-schema-migrator:v0.129.8
+    container_name: signoz-schema-migrator-async
+    restart: on-failure
+    networks:
+      - internal
+    command:
+      - async
+      - --dsn=tcp://clickhouse:9000
+      - --up=
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      schema-migrator-sync:
+        condition: service_completed_successfully
+    logging:
+      options:
+        max-size: 50m
+        max-file: "3"
+
+  signoz:
+    image: signoz/signoz:v0.100.1
+    container_name: signoz
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=internal"
+      - "traefik.http.routers.signoz.rule=Host(`signoz.${DOMAIN:-example.duckdns.org}`)"
+      - "traefik.http.routers.signoz.entrypoints=websecure"
+      - "traefik.http.routers.signoz.tls=true"
+      - "traefik.http.services.signoz.loadbalancer.server.port=8080"
+    networks:
+      - internal
+    # SECURITY: Порт не пробрасывается наружу, доступ только через Traefik
+    # ports:
+    #   - "8080:8080"
+    command:
+      - --config=/root/config/prometheus.yml
+    volumes:
+      - ./signoz-config/signoz/prometheus.yml:/root/config/prometheus.yml:ro
+      - ./signoz-config/dashboards:/root/config/dashboards:ro
+      - signoz-data:/var/lib/signoz
+    environment:
+      - SIGNOZ_ALERTMANAGER_PROVIDER=signoz
+      - SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
+      - DASHBOARDS_PATH=/root/config/dashboards
+      - STORAGE=clickhouse
+      - GODEBUG=netdns=go
+      - TELEMETRY_ENABLED=true
+      - DEPLOYMENT_TYPE=docker-standalone-amd
+      - DOT_METRICS_ENABLED=true
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      schema-migrator-sync:
+        condition: service_completed_successfully
+    logging:
+      options:
+        max-size: 50m
+        max-file: "3"
+
+  signoz-otel-collector:
+    image: signoz/signoz-otel-collector:v0.129.8
+    container_name: signoz-otel-collector
+    restart: unless-stopped
+    networks:
+      - internal
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./signoz-config/collector-config.yaml:/etc/otel-collector-config.yaml:ro
+      - ./signoz-config/signoz/otel-collector-opamp-config.yaml:/etc/manager-config.yaml:ro
+    command:
+      - --config=/etc/otel-collector-config.yaml
+      - --manager-config=/etc/manager-config.yaml
+      - --copy-path=/var/tmp/collector-config.yaml
+      - --feature-gates=-pkg.translator.prometheus.NormalizeName
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=host.name=signoz-host,os.type=linux
+      - LOW_CARDINAL_EXCEPTION_GROUPING=false
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8888/metrics",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      schema-migrator-sync:
+        condition: service_completed_successfully
+      signoz:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: 50m
+        max-file: "3"
+
+volumes:
+  traefik-data:
+  coredns-config:
+  uptime-kuma:
+  vaultwarden:
+  clickhouse-data:
+  zookeeper-data:
+  signoz-data:
+
+networks:
+  internal:
+    driver: bridge
+  external:
+    driver: bridge
