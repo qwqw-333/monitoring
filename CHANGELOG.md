@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 и этот проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [Unreleased]
+
+### Добавлено
+- Поддержка позиционных аргументов для команд `up`, `down`, `restart` и `logs` в Makefile
+  - Теперь можно использовать `make restart traefik` вместо `make restart SERVICE_NAME=traefik`
+  - Команды работают как с аргументом (конкретный сервис), так и без него (все сервисы)
+
 ## [1.0.0] - 2025-11-08
 
 ### Добавлено

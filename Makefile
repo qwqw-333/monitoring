@@ -4,6 +4,9 @@
 COMPOSE_FILE := compose.yaml
 COMPOSE := docker compose -f $(COMPOSE_FILE)
 
+# Получаем имя сервиса из аргументов командной строки
+SERVICE_NAME := $(word 2, $(MAKECMDGOALS))
+
 # Цвета для вывода
 GREEN  := \033[0;32m
 YELLOW := \033[0;33m
@@ -15,14 +18,18 @@ help: ## Показать эту справку
 	@echo ""
 	@echo "$(YELLOW)Управление:$(NC)"
 	@echo "  $(YELLOW)up$(NC)              Запустить все сервисы"
+	@echo "  $(YELLOW)up <service>$(NC)    Запустить конкретный сервис (например: make up traefik)"
 	@echo "  $(YELLOW)down$(NC)            Остановить все сервисы"
+	@echo "  $(YELLOW)down <service>$(NC)   Остановить конкретный сервис (например: make down traefik)"
 	@echo "  $(YELLOW)restart$(NC)         Перезапустить все сервисы"
+	@echo "  $(YELLOW)restart <service>$(NC) Перезапустить конкретный сервис (например: make restart traefik)"
 	@echo ""
 	@echo "$(YELLOW)Логи:$(NC)"
 	@echo "  $(YELLOW)logs$(NC)            Логи всех сервисов"
-	@echo "  $(YELLOW)logs-traefik$(NC)    Логи Traefik"
-	@echo "  $(YELLOW)logs-signoz$(NC)     Логи SigNoz"
-	@echo "  $(YELLOW)logs-clickhouse$(NC) Логи ClickHouse"
+	@echo "  $(YELLOW)logs <service>$(NC)   Логи конкретного сервиса (например: make logs traefik)"
+	@echo "  $(YELLOW)logs-traefik$(NC)    Логи Traefik (алиас)"
+	@echo "  $(YELLOW)logs-signoz$(NC)     Логи SigNoz (алиас)"
+	@echo "  $(YELLOW)logs-clickhouse$(NC) Логи ClickHouse (алиас)"
 	@echo ""
 	@echo "$(YELLOW)Статус:$(NC)"
 	@echo "  $(YELLOW)ps$(NC)              Статус контейнеров"
@@ -43,23 +50,47 @@ help: ## Показать эту справку
 	@echo "  $(YELLOW)clean-all$(NC)       Удалить всё включая volumes $(RED)(ОПАСНО!)$(NC)"
 	@echo "  $(YELLOW)shell-<service>$(NC) Shell в контейнере (traefik/clickhouse/signoz)"
 
-up: ## Запустить все сервисы
-	@echo "$(GREEN)Запуск всех сервисов...$(NC)"
-	$(COMPOSE) up -d
-	@echo "$(GREEN)Сервисы запущены!$(NC)"
-	@$(MAKE) ps
+up: ## Запустить все сервисы или конкретный сервис (make up traefik)
+	@if [ -z "$(SERVICE_NAME)" ]; then \
+		echo "$(GREEN)Запуск всех сервисов...$(NC)"; \
+		$(COMPOSE) up -d; \
+		echo "$(GREEN)Сервисы запущены!$(NC)"; \
+		$(MAKE) ps; \
+	else \
+		echo "$(GREEN)Запуск сервиса $(SERVICE_NAME)...$(NC)"; \
+		$(COMPOSE) up -d $(SERVICE_NAME); \
+		echo "$(GREEN)Сервис $(SERVICE_NAME) запущен!$(NC)"; \
+		$(MAKE) ps; \
+	fi
 
-down: ## Остановить все сервисы
-	@echo "$(YELLOW)Остановка всех сервисов...$(NC)"
-	$(COMPOSE) down
+down: ## Остановить все сервисы или конкретный сервис (make down traefik)
+	@if [ -z "$(SERVICE_NAME)" ]; then \
+		echo "$(YELLOW)Остановка всех сервисов...$(NC)"; \
+		$(COMPOSE) down; \
+	else \
+		echo "$(YELLOW)Остановка сервиса $(SERVICE_NAME)...$(NC)"; \
+		$(COMPOSE) stop $(SERVICE_NAME); \
+		echo "$(GREEN)Сервис $(SERVICE_NAME) остановлен!$(NC)"; \
+	fi
 
-restart: ## Перезапустить все сервисы
-	@echo "$(YELLOW)Перезапуск всех сервисов...$(NC)"
-	$(COMPOSE) restart
-	@$(MAKE) ps
+restart: ## Перезапустить все сервисы или конкретный сервис (make restart traefik)
+	@if [ -z "$(SERVICE_NAME)" ]; then \
+		echo "$(YELLOW)Перезапуск всех сервисов...$(NC)"; \
+		$(COMPOSE) restart; \
+		$(MAKE) ps; \
+	else \
+		echo "$(YELLOW)Перезапуск сервиса $(SERVICE_NAME)...$(NC)"; \
+		$(COMPOSE) restart $(SERVICE_NAME); \
+		echo "$(GREEN)Сервис $(SERVICE_NAME) перезапущен!$(NC)"; \
+		$(MAKE) ps; \
+	fi
 
-logs: ## Показать логи всех сервисов
-	$(COMPOSE) logs -f
+logs: ## Показать логи всех сервисов или конкретного сервиса (make logs traefik)
+	@if [ -z "$(SERVICE_NAME)" ]; then \
+		$(COMPOSE) logs -f; \
+	else \
+		$(COMPOSE) logs -f $(SERVICE_NAME); \
+	fi
 
 logs-traefik: ## Показать логи Traefik
 	$(COMPOSE) logs -f traefik
@@ -163,4 +194,8 @@ validate: ## Проверить синтаксис compose.yaml
 stats: ## Показать статистику использования ресурсов
 	@echo "$(GREEN)Статистика использования ресурсов:$(NC)"
 	@docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"
+
+# Перехватываем аргументы, которые не являются реальными целями
+%:
+	@:
 
