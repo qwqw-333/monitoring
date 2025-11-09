@@ -1,43 +1,34 @@
-# CoreDNS конфигурация
-# Используется переменная окружения DOMAIN для подстановки домена
+# CoreDNS template
+# Переменные окружения
+#   DOMAIN     - ваш домен, напр. example.duckdns.org
+#   SERVER_IP  - IP Traefik/сервера (по умолчанию 127.0.0.1)
 
-# Health check endpoint на порту 8080
-.:8080 {
-    health
-}
+.:53 {
+    errors
+    log
+    cache 30
+    reload
 
-${DOMAIN} {
+    health :8080 {
+        lameduck 5s
+    }
+    ready
+    prometheus 0.0.0.0:9153
+
     hosts {
-        # Укажите IP адрес вашего сервера
-        # Для локального использования (одна машина)
-        127.0.0.1 kuma.${DOMAIN}
-        127.0.0.1 vault.${DOMAIN}
-        127.0.0.1 signoz.${DOMAIN}
-
-        # Для использования в сети замените 127.0.0.1 на IP-адрес сервера
-        # Например: YOUR_SERVER_IP kuma.${DOMAIN}
-        # Например: YOUR_SERVER_IP vault.${DOMAIN}
-        # Например: YOUR_SERVER_IP signoz.${DOMAIN}
-
+        ${SERVER_IP:-127.0.0.1} kuma.${DOMAIN}
+        ${SERVER_IP:-127.0.0.1} vault.${DOMAIN}
+        ${SERVER_IP:-127.0.0.1} signoz.${DOMAIN}
+        ttl 60
         fallthrough
     }
-    # Fallback на публичный DNS если домен не найден локально
+
     forward . 8.8.8.8 1.1.1.1
-    log
-    errors
 }
 
-# Резолвим запросы на qq домен на DNS-сервер YOUR_SERVER_IP
+# При необходимости можно добавить отдельную зону под "qq":
 # qq {
-#     forward . YOUR_SERVER_IP
+#     forward . ${SERVER_IP}
 #     log
 #     errors
 # }
-
-# Резолвим все остальные запросы через публичный DNS
-. {
-    forward . 8.8.8.8 1.1.1.1
-    log
-    errors
-}
-
