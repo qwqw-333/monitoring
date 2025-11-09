@@ -6,10 +6,13 @@
 2. Войдите через GitHub/Google
 3. Скопируйте **API Token**
 
-## 2. Создайте файл .env
+## 2. Файл .env
 
 ```bash
 echo "DUCKDNS_API_TOKEN=ваш-токен" > .env
+```
+```bash
+echo $(htpasswd -nB user) | sed -e s/\\$/\\$\\$/g
 ```
 
 ## 3. Настройте поддомены в Duck DNS
