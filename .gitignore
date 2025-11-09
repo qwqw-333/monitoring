@@ -1,5 +1,6 @@
 # Environment variables
-.env
+.env*
+!.env.example
 
 # Let's Encrypt certificates and account data
 letsencrypt/acme.json
