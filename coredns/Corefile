@@ -16,10 +16,12 @@
     prometheus 0.0.0.0:9153
 
     hosts {
-        172.30.0.212 kuma.${DOMAIN}
-        172.30.0.212 vault.${DOMAIN}
-        172.30.0.212 signoz.${DOMAIN}
-	172.30.0.212 traefik-dashboard.${DOMAIN}
+        172.30.0.212 kuma.2dep.duckdns.org
+        172.30.0.212 vault.2dep.duckdns.org
+        172.30.0.212 signoz.2dep.duckdns.org
+	172.30.0.212 traefik-dashboard.2dep.duckdns.org
+	172.30.0.212 grafana.2dep.duckdns.org
+	172.30.0.212 prometheus.2dep.duckdns.org
 	ttl 60
 	fallthrough
     }
