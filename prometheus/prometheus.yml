@@ -35,3 +35,21 @@ scrape_configs:
       insecure_skip_verify: true
     static_configs:
       - targets: ['172.30.0.195:443']
+
+  - job_name: 'snmp'
+    static_configs:
+      - targets:
+          - 10.5.10.91
+          - 10.5.141.2
+    metrics_path: /snmp
+    params:
+      module: [grandstream_custom]
+      auth: [public_v2]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: snmp-exporter:9116
+

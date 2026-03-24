@@ -1,8 +1,15 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   traefik:
     image: traefik:v3.0
     container_name: traefik
     restart: unless-stopped
+    logging: *default-logging
     security_opt:
       - no-new-privileges:true
     networks:
@@ -15,6 +22,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./letsencrypt:/letsencrypt
+      - traefik-data:/data
     environment:
       - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
       - ACME_EMAIL=${ACME_EMAIL:-your-email@example.com}
@@ -71,11 +79,13 @@ services:
     image: coredns/coredns:latest
     container_name: coredns
     restart: always
+    logging: *default-logging
     ports:
       - "53:53/udp"
       - "53:53/tcp"
     volumes:
       - ./coredns/Corefile:/Corefile:ro
+      - coredns-config:/etc/coredns
     networks:
       - internal
       - external
@@ -84,6 +94,7 @@ services:
     image: louislam/uptime-kuma:2
     container_name: uptime-kuma
     restart: always
+    logging: *default-logging
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=internal"
@@ -100,6 +111,7 @@ services:
     image: vaultwarden/server:latest
     container_name: vaultwarden
     restart: always
+    logging: *default-logging
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=internal"
@@ -123,6 +135,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     restart: unless-stopped
+    logging: *default-logging
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -130,6 +143,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=15d'
+      - '--storage.tsdb.retention.size=20GB'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     networks:
@@ -147,22 +161,30 @@ services:
     image: grafana/loki:latest
     container_name: loki
     restart: unless-stopped
+    logging: *default-logging
     networks:
       - internal
     ports:
       - "3100:3100"
+    volumes:
+      - ./loki/local-config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
     command: -config.file=/etc/loki/local-config.yaml
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     restart: unless-stopped
+    logging: *default-logging
     networks:
       - internal
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_LOG_MODE=console
+      - GF_LOG_LEVEL=error
+      - GF_AUTH_TOKEN_ROTATION_INTERVAL_MINUTES=1440
     volumes:
       - grafana_data:/var/lib/grafana
     labels:
@@ -177,6 +199,7 @@ services:
     image: prom/node-exporter:latest
     container_name: node-exporter
     restart: unless-stopped
+    logging: *default-logging
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -189,10 +212,22 @@ services:
     networks:
       - internal
 
+  snmp-exporter:
+    image: prom/snmp-exporter
+    container_name: snmp-exporter
+    restart: unless-stopped
+    ports:
+      - "9116:9116"
+    volumes:
+      - ./snmp/snmp.yml:/etc/snmp_exporter/snmp.yml
+    networks:
+      - internal
+
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     restart: unless-stopped
+    logging: *default-logging
     privileged: true
     devices:
       - /dev/kmsg
@@ -212,6 +247,7 @@ volumes:
   vaultwarden:
   prometheus_data:
   grafana_data:
+  loki-data:
 
 networks:
   internal:
