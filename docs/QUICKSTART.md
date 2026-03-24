@@ -9,44 +9,50 @@
 ## 2. Файл .env
 
 ```bash
-echo "DUCKDNS_API_TOKEN=ваш-токен" > .env
+cat > .env <<EOF
+DUCKDNS_TOKEN=ваш-токен
+ACME_EMAIL=ваш@email.com
+DOMAIN=example.duckdns.org
+GRAFANA_USER=admin
+GRAFANA_PASSWORD=секретный-пароль
+TRAEFIK_AUTH=user:$$apr1$$...  # htpasswd -nB user
+EOF
 ```
+
+Генерация хэша пароля для Traefik:
+
 ```bash
 echo $(htpasswd -nB user) | sed -e s/\\$/\\$\\$/g
 ```
 
 ## 3. Настройте поддомены в Duck DNS
 
-На https://www.duckdns.org добавьте поддомены:
-- `kuma` → `kuma.example.duckdns.org`
-- `vault` → `vault.example.duckdns.org`
-- `signoz` → `signoz.example.duckdns.org`
+На https://www.duckdns.org добавьте поддомен `2dep` (или свой) и укажите IP сервера.
 
-## 4. Обновите IP адрес
-
-```bash
-# Узнайте ваш публичный IP
-curl ifconfig.me
-
-# Обновите в Duck DNS (замените example на ваш домен)
-curl "https://www.duckdns.org/update?domains=example&token=YOUR_TOKEN&ip=YOUR_IP"
-```
-
-## 5. Запустите сервисы
+## 4. Запустите сервисы
 
 ```bash
 docker compose up -d
 ```
 
-## 6. Настройте Nginx Proxy Manager
+## 5. Проверьте статус
 
-1. Откройте `http://YOUR_SERVER_IP:81`
-2. Создайте аккаунт администратора
-3. Настройте SSL сертификаты и proxy hosts (см. [NGINX_PROXY_MANAGER_SETUP.md](NGINX_PROXY_MANAGER_SETUP.md))
+```bash
+make ps
+# или
+docker compose ps
+```
 
 ## Готово!
 
 Сервисы доступны по адресам:
-- https://kuma.example.duckdns.org
-- https://vault.example.duckdns.org
-- https://signoz.example.duckdns.org
+
+| Сервис | URL |
+|--------|-----|
+| Grafana | https://grafana.example.duckdns.org |
+| Prometheus | https://prometheus.example.duckdns.org |
+| Uptime Kuma | https://kuma.example.duckdns.org |
+| Vaultwarden | https://vault.example.duckdns.org |
+| Traefik Dashboard | https://traefik-dashboard.example.duckdns.org |
+
+> Замените `example` на ваш реальный поддомен DuckDNS.

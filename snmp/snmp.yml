@@ -1,0 +1,35 @@
+auths:
+  public_v2:
+    community: public
+    version: 2
+
+modules:
+  # Наш модуль для Grandstream
+  grandstream_custom:
+    walk:
+      - 1.3.6.1.4.1.42397.1.3.2.1  # Корневой OID для walk (оптимизация)
+    metrics:
+      - name: gs_sip_account_1_status
+        oid: 1.3.6.1.4.1.42397.1.3.2.1.1.0.0
+        type: gauge
+        help: SIP Account 1 Status
+      - name: gs_sip_account_2_status
+        oid: 1.3.6.1.4.1.42397.1.3.2.1.2.0.0
+        type: gauge
+        help: SIP Account 2 Status
+      - name: gs_sip_account_3_status
+        oid: 1.3.6.1.4.1.42397.1.3.2.1.3.0.0
+        type: gauge
+        help: SIP Account 3 Status
+      - name: gs_sip_account_4_status
+        oid: 1.3.6.1.4.1.42397.1.3.2.1.4.0.0
+        type: gauge
+        help: SIP Account 4 Status
+      - name: gs_sip_account_5_status
+        oid: 1.3.6.1.4.1.42397.1.3.2.1.5.0.0
+        type: gauge
+        help: SIP Account 5 Status
+      - name: gs_sip_account_6_status
+        oid: 1.3.6.1.4.1.42397.1.3.2.1.6.0.0
+        type: gauge
+        help: SIP Account 6 Status
