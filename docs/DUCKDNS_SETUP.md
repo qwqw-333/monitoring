@@ -29,7 +29,9 @@ DUCKDNS_API_TOKEN=your-duckdns-token-here
 В Duck DNS добавьте поддомены:
 - `kuma` → `kuma.example.duckdns.org`
 - `vault` → `vault.example.duckdns.org`
-- `signoz` → `signoz.example.duckdns.org`
+- `grafana` → `grafana.example.duckdns.org`
+- `prometheus` → `prometheus.example.duckdns.org`
+- `traefik-dashboard` → `traefik-dashboard.example.duckdns.org`
 
 ## Шаг 4: Обновление IP адреса
 
@@ -83,7 +85,7 @@ openssl s_client -connect kuma.example.duckdns.org:443 -servername kuma.example.
 **Сертификат не получается:**
 - Проверьте токен в `.env`
 - Убедитесь, что поддомены созданы
-- Проверьте логи: `docker compose logs nginx-proxy-manager`
+- Проверьте логи: `docker compose logs traefik`
 
 ## Примечания
 

@@ -28,7 +28,9 @@ DOMAIN=your-domain.duckdns.org
 ```
 127.0.0.1 kuma.example.duckdns.org
 127.0.0.1 vault.example.duckdns.org
-127.0.0.1 signoz.example.duckdns.org
+127.0.0.1 grafana.example.duckdns.org
+127.0.0.1 prometheus.example.duckdns.org
+127.0.0.1 traefik-dashboard.example.duckdns.org
 ```
 
 ### Использование в сети
@@ -38,7 +40,9 @@ DOMAIN=your-domain.duckdns.org
 ```
 YOUR_SERVER_IP kuma.example.duckdns.org
 YOUR_SERVER_IP vault.example.duckdns.org
-YOUR_SERVER_IP signoz.example.duckdns.org
+YOUR_SERVER_IP grafana.example.duckdns.org
+YOUR_SERVER_IP prometheus.example.duckdns.org
+YOUR_SERVER_IP traefik-dashboard.example.duckdns.org
 ```
 
 **Как узнать IP адрес:**

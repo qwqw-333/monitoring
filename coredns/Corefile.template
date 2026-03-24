@@ -18,8 +18,9 @@
     hosts {
         172.30.0.212 kuma.${DOMAIN}
         172.30.0.212 vault.${DOMAIN}
-        172.30.0.212 signoz.${DOMAIN}
-	172.30.0.212 traefik-dashboard.${DOMAIN}
+        172.30.0.212 traefik-dashboard.${DOMAIN}
+        172.30.0.212 grafana.${DOMAIN}
+        172.30.0.212 prometheus.${DOMAIN}
 	ttl 60
 	fallthrough
     }
