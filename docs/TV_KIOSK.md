@@ -15,7 +15,7 @@
 
 **WallPanel** (`xyz.wallpanel.app`) — open-source kiosk-браузер для дашбордов.
 
-- Dashboard URL: `https://grafana.2dep.duckdns.org/d/freeswitch-tv?kiosk`
+- Dashboard URL: `https://grafana.2dep.duckdns.org/d/adzvr2k/voip-tv?kiosk`
 - Пользователь Grafana: `monitoring`
 - Сессия сохраняется в cookies WebView
 

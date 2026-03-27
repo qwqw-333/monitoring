@@ -21,8 +21,8 @@ Prometheus scrapes:
   - cadvisor              — метрики Docker контейнеров
   - traefik               — метрики reverse proxy
   - snmp-exporter         — SNMP метрики сетевого оборудования (10.5.10.91, 10.5.141.2)
-  - fusionpbx             — VoIP метрики (172.30.0.210, 172.30.0.195) через кастомный /metrics.txt
-  - freeswitch-exporter   — FreeSWITCH метрики через ESL (172.30.0.201, .197, .207, .214, .215)
+  - fusionpbx             — VoIP метрики (172.30.0.210) через кастомный /metrics.txt (legacy)
+  - freeswitch-exporter   — FreeSWITCH метрики через ESL (172.30.0.195, .201, .197, .207, .214, .215)
 
 Loki — сбор логов, retention 14 дней
 ```
@@ -43,34 +43,51 @@ Loki — сбор логов, retention 14 дней
 | vaultwarden | vaultwarden/server | Менеджер паролей (Bitwarden-совместимый) |
 | freeswitch-exporter | custom (Python) | FreeSWITCH метрики через ESL, multi-target (порт 9724) |
 
+## Доступ к Grafana
+
+| Способ | URL |
+|--------|-----|
+| Через домен (Traefik + TLS) | `https://grafana.2dep.duckdns.org` |
+| Через IP (LAN, без TLS) | `http://172.30.0.212:3000` |
+
 ## TV Kiosk
 
 KIVI TV (Android 11, 172.30.1.129:5555 ADB) отображает Grafana дашборд через **WallPanel**.
 
 - Приложение: `xyz.wallpanel.app`
-- Dashboard URL: `https://grafana.2dep.duckdns.org/d/freeswitch-tv?kiosk`
+- Dashboard URL: `https://grafana.2dep.duckdns.org/d/adzvr2k/voip-tv?kiosk`
 - Пользователь Grafana: `monitoring`
 - WallPanel REST API: `http://172.30.1.129:2971`
 
 Подробнее: [docs/TV_KIOSK.md](docs/TV_KIOSK.md)
 
-## Grafana Dashboards
+## Grafana Dashboard
 
 | Dashboard | UID | Назначение |
 |-----------|-----|-----------|
-| FreeSWITCH Overview | `freeswitch-overview` | Детальный дашборд для анализа (графики, таблицы) |
-| FreeSWITCH TV | `freeswitch-tv` | TV kiosk — статус кластера одним взглядом |
+| VoIP TV | `adzvr2k` | TV kiosk — статус кластера одним взглядом |
 
-Оба дашборда провижонятся из `grafana/dashboards/` через `grafana/provisioning/dashboards/dashboards.yml`.
+Дашборд хранится в базе Grafana (не provisioned) и редактируется через веб-интерфейс.
 
-### FreeSWITCH TV — панели
+### VoIP TV — панели
 
 - **Uptime** — время работы каждого сервера (красный <1ч, оранжевый <1д)
 - **Server Status** — UP/DOWN по серверам
 - **Registrations** — количество активных регистраций
 - **Active Calls / Channels** — текущая нагрузка
-- **Failed Calls (1h)** — рост ошибок за последний час
-- **Gateways** — статус каждого гейтвея (цветные блоки UP/DOWN)
+- **Failed Calls (1h)** — рост неуспешных SIP-транзакций через гейтвеи за час
+- **Gateways** — статус гейтвеев по строкам (Kv UMZ, Kv Gate, Gate0, Spas, Int Gate, WG0)
+
+### Мониторируемые серверы
+
+| server_name | IP | Тип |
+|-------------|-----|-----|
+| Kv UMZ | 172.30.0.195 | FusionPBX (production, ~860 регистраций) |
+| Kv Gate | 172.30.0.207 | FreeSWITCH standalone |
+| Gate0 | 172.30.0.197 | FreeSWITCH standalone |
+| Spas | 172.30.0.214 | FreeSWITCH standalone |
+| Int Gate | 172.30.0.215 | FreeSWITCH standalone |
+| WG0 | 172.30.0.201 | FreeSWITCH standalone |
 
 ## Ключевые команды
 
@@ -102,10 +119,7 @@ loki/local-config.yaml                          — конфиг Loki
 coredns/Corefile                                — DNS зоны и хосты
 snmp/snmp.yml                                   — SNMP модули
 freeswitch-exporter/exporter.py                 — кастомный FreeSWITCH экспортёр (ESL → Prometheus)
-grafana/dashboards/freeswitch-overview.json     — Grafana дашборд FreeSWITCH (детальный)
-grafana/dashboards/freeswitch-tv.json           — Grafana дашборд FreeSWITCH (TV kiosk)
-grafana/provisioning/dashboards/dashboards.yml  — provisioning дашбордов
-.env                                            — секреты (DUCKDNS_TOKEN, GRAFANA_USER/PASSWORD, FREESWITCH_ESL_PASSWORD)
+.env                                            — секреты (DUCKDNS_TOKEN, FREESWITCH_ESL_PASSWORD)
 ```
 
 ## Важные особенности

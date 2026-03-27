@@ -47,6 +47,7 @@ scrape_configs:
           - 172.30.0.207:8021
           - 172.30.0.214:8021
           - 172.30.0.215:8021
+          - 172.30.0.195:8021
         labels:
           group: freeswitch
     relabel_configs:
@@ -77,6 +78,27 @@ scrape_configs:
         regex: '172\.30\.0\.215'
         target_label: server_name
         replacement: 'Int Gate'
+      - source_labels: [instance]
+        regex: '172\.30\.0\.195'
+        target_label: server_name
+        replacement: 'Kv UMZ'
+    metric_relabel_configs:
+      - source_labels: [proxy]
+        regex: 'sip:10\.5\.100\.207'
+        target_label: name
+        replacement: 'Kv Gate'
+      - source_labels: [proxy]
+        regex: 'sip:10\.5\.101\.195'
+        target_label: name
+        replacement: 'Lv UMZ'
+      - source_labels: [proxy]
+        regex: 'sip:10\.5\.102\.195'
+        target_label: name
+        replacement: 'Dn UMZ'
+      - source_labels: [proxy]
+        regex: 'sip:10\.5\.104\.195'
+        target_label: name
+        replacement: 'Od UMZ'
 
   - job_name: 'snmp'
     static_configs:
