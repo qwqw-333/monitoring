@@ -1,0 +1,280 @@
+{
+  "uid": "freeswitch-tv",
+  "title": "FreeSWITCH TV",
+  "description": "TV kiosk dashboard — FreeSWITCH cluster status at a glance",
+  "tags": ["freeswitch", "voip", "tv"],
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "time": { "from": "now-5m", "to": "now" },
+  "timezone": "browser",
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 2,
+        "includeAll": false,
+        "multi": false
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dtdurations",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 3600 },
+              { "color": "green", "value": 86400 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "text": { "titleSize": 22, "valueSize": 22 }
+      },
+      "targets": [
+        { "expr": "freeswitch_uptime_seconds{job=\"freeswitch\", server_name=\"Kv Gate\"}", "legendFormat": "Kv Gate", "refId": "A" },
+        { "expr": "freeswitch_uptime_seconds{job=\"freeswitch\", server_name=\"Gate 0\"}", "legendFormat": "Gate0", "refId": "B" },
+        { "expr": "freeswitch_uptime_seconds{job=\"freeswitch\", server_name=\"Spas\"}", "legendFormat": "Spas", "refId": "C" },
+        { "expr": "freeswitch_uptime_seconds{job=\"freeswitch\", server_name=\"Int Gate\"}", "legendFormat": "Int Gate", "refId": "D" },
+        { "expr": "freeswitch_uptime_seconds{job=\"freeswitch\", server_name=\"WG0\"}", "legendFormat": "WG0", "refId": "E" }
+      ]
+    },
+
+    {
+      "id": 2,
+      "title": "Server Status",
+      "type": "stat",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 3 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } } }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "text": { "titleSize": 22, "valueSize": 22 }
+      },
+      "targets": [
+        { "expr": "freeswitch_up{job=\"freeswitch\", server_name=\"Kv Gate\"}", "legendFormat": "Kv Gate", "refId": "A" },
+        { "expr": "freeswitch_up{job=\"freeswitch\", server_name=\"Gate 0\"}", "legendFormat": "Gate0", "refId": "B" },
+        { "expr": "freeswitch_up{job=\"freeswitch\", server_name=\"Spas\"}", "legendFormat": "Spas", "refId": "C" },
+        { "expr": "freeswitch_up{job=\"freeswitch\", server_name=\"Int Gate\"}", "legendFormat": "Int Gate", "refId": "D" },
+        { "expr": "freeswitch_up{job=\"freeswitch\", server_name=\"WG0\"}", "legendFormat": "WG0", "refId": "E" }
+      ]
+    },
+
+    {
+      "id": 3,
+      "title": "Registrations",
+      "type": "stat",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ]
+          },
+          "color": { "mode": "thresholds" },
+          "unit": "short",
+          "decimals": 0
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "text": { "titleSize": 22, "valueSize": 22 }
+      },
+      "targets": [
+        { "expr": "freeswitch_registrations_active{job=\"freeswitch\", server_name=\"Kv Gate\"}", "legendFormat": "Kv Gate", "refId": "A" },
+        { "expr": "freeswitch_registrations_active{job=\"freeswitch\", server_name=\"Gate 0\"}", "legendFormat": "Gate0", "refId": "B" },
+        { "expr": "freeswitch_registrations_active{job=\"freeswitch\", server_name=\"Spas\"}", "legendFormat": "Spas", "refId": "C" },
+        { "expr": "freeswitch_registrations_active{job=\"freeswitch\", server_name=\"Int Gate\"}", "legendFormat": "Int Gate", "refId": "D" },
+        { "expr": "freeswitch_registrations_active{job=\"freeswitch\", server_name=\"WG0\"}", "legendFormat": "WG0", "refId": "E" }
+      ]
+    },
+
+    {
+      "id": 4,
+      "title": "Active Calls",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [ { "color": "green", "value": null } ]
+          },
+          "color": { "mode": "thresholds" },
+          "unit": "short"
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "text": { "titleSize": 18, "valueSize": 18 }
+      },
+      "targets": [
+        { "expr": "freeswitch_calls_active{job=\"freeswitch\", server_name=\"Kv Gate\"}", "legendFormat": "Kv Gate", "refId": "A" },
+        { "expr": "freeswitch_calls_active{job=\"freeswitch\", server_name=\"Gate 0\"}", "legendFormat": "Gate0", "refId": "B" },
+        { "expr": "freeswitch_calls_active{job=\"freeswitch\", server_name=\"Spas\"}", "legendFormat": "Spas", "refId": "C" },
+        { "expr": "freeswitch_calls_active{job=\"freeswitch\", server_name=\"Int Gate\"}", "legendFormat": "Int Gate", "refId": "D" },
+        { "expr": "freeswitch_calls_active{job=\"freeswitch\", server_name=\"WG0\"}", "legendFormat": "WG0", "refId": "E" }
+      ]
+    },
+
+    {
+      "id": 5,
+      "title": "Active Channels",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [ { "color": "green", "value": null } ]
+          },
+          "color": { "mode": "thresholds" },
+          "unit": "short"
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "text": { "titleSize": 18, "valueSize": 18 }
+      },
+      "targets": [
+        { "expr": "freeswitch_channels_active{job=\"freeswitch\", server_name=\"Kv Gate\"}", "legendFormat": "Kv Gate", "refId": "A" },
+        { "expr": "freeswitch_channels_active{job=\"freeswitch\", server_name=\"Gate 0\"}", "legendFormat": "Gate0", "refId": "B" },
+        { "expr": "freeswitch_channels_active{job=\"freeswitch\", server_name=\"Spas\"}", "legendFormat": "Spas", "refId": "C" },
+        { "expr": "freeswitch_channels_active{job=\"freeswitch\", server_name=\"Int Gate\"}", "legendFormat": "Int Gate", "refId": "D" },
+        { "expr": "freeswitch_channels_active{job=\"freeswitch\", server_name=\"WG0\"}", "legendFormat": "WG0", "refId": "E" }
+      ]
+    },
+
+    {
+      "id": 6,
+      "title": "Failed Calls (1h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 20 }
+            ]
+          },
+          "color": { "mode": "thresholds" },
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0"
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "text": { "titleSize": 18, "valueSize": 18 }
+      },
+      "targets": [
+        { "expr": "sum(increase(freeswitch_gateway_failed_calls_in_total{job=\"freeswitch\", server_name=\"Kv Gate\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]) + increase(freeswitch_gateway_failed_calls_out_total{job=\"freeswitch\", server_name=\"Kv Gate\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]))", "legendFormat": "Kv Gate", "refId": "A" },
+        { "expr": "sum(increase(freeswitch_gateway_failed_calls_in_total{job=\"freeswitch\", server_name=\"Gate 0\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]) + increase(freeswitch_gateway_failed_calls_out_total{job=\"freeswitch\", server_name=\"Gate 0\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]))", "legendFormat": "Gate0", "refId": "B" },
+        { "expr": "sum(increase(freeswitch_gateway_failed_calls_in_total{job=\"freeswitch\", server_name=\"Spas\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]) + increase(freeswitch_gateway_failed_calls_out_total{job=\"freeswitch\", server_name=\"Spas\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]))", "legendFormat": "Spas", "refId": "C" },
+        { "expr": "sum(increase(freeswitch_gateway_failed_calls_in_total{job=\"freeswitch\", server_name=\"Int Gate\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]) + increase(freeswitch_gateway_failed_calls_out_total{job=\"freeswitch\", server_name=\"Int Gate\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]))", "legendFormat": "Int Gate", "refId": "D" },
+        { "expr": "sum(increase(freeswitch_gateway_failed_calls_in_total{job=\"freeswitch\", server_name=\"WG0\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]) + increase(freeswitch_gateway_failed_calls_out_total{job=\"freeswitch\", server_name=\"WG0\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}[1h]))", "legendFormat": "WG0", "refId": "E" }
+      ]
+    },
+
+    {
+      "id": 7,
+      "title": "Gateways",
+      "type": "stat",
+      "gridPos": { "h": 11, "w": 24, "x": 0, "y": 13 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } } }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ]
+          },
+          "color": { "mode": "thresholds" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "value_and_name",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "text": { "titleSize": 18, "valueSize": 18 }
+      },
+      "targets": [
+        { "expr": "freeswitch_gateway_up{job=\"freeswitch\", server_name=\"Kv Gate\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}", "legendFormat": "Kv Gate: {{name}}", "refId": "A" },
+        { "expr": "freeswitch_gateway_up{job=\"freeswitch\", server_name=\"Gate 0\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}", "legendFormat": "Gate 0: {{name}}", "refId": "B" },
+        { "expr": "freeswitch_gateway_up{job=\"freeswitch\", server_name=\"Spas\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}", "legendFormat": "Spas: {{name}}", "refId": "C" },
+        { "expr": "freeswitch_gateway_up{job=\"freeswitch\", server_name=\"Int Gate\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}", "legendFormat": "Int Gate: {{name}}", "refId": "D" },
+        { "expr": "freeswitch_gateway_up{job=\"freeswitch\", server_name=\"WG0\", name!~\"to_gate_1|to_gate_2|to_gate_3\"}", "legendFormat": "WG0: {{name}}", "refId": "E" }
+      ]
+    }
+  ]
+}

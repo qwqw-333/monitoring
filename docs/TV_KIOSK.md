@@ -15,7 +15,7 @@
 
 **WallPanel** (`xyz.wallpanel.app`) — open-source kiosk-браузер для дашбордов.
 
-- Dashboard URL: `https://grafana.2dep.duckdns.org/d/ad5hzfn/voip-monitoring?orgId=1&kiosk`
+- Dashboard URL: `https://grafana.2dep.duckdns.org/d/freeswitch-tv?kiosk`
 - Пользователь Grafana: `monitoring`
 - Сессия сохраняется в cookies WebView
 
@@ -55,6 +55,14 @@ curl -X POST http://172.30.1.129:2971/api/command \
 ```
 
 > ⚠️ `urlchange` меняет URL только для текущей сессии. Для постоянного изменения — обновить в настройках WallPanel (Application Settings → Dashboard URL).
+
+### Открыть настройки WallPanel удалённо
+
+```bash
+curl -X POST http://172.30.1.129:2971/api/command \
+  -H 'Content-Type: application/json' \
+  -d '{"settings": true}'
+```
 
 ### Перезагрузить страницу
 

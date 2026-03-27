@@ -36,6 +36,48 @@ scrape_configs:
     static_configs:
       - targets: ['172.30.0.195:443']
 
+  - job_name: 'freeswitch'
+    scrape_interval: 30s
+    scrape_timeout: 15s
+    metrics_path: /probe
+    static_configs:
+      - targets:
+          - 172.30.0.201:8021
+          - 172.30.0.197:8021
+          - 172.30.0.207:8021
+          - 172.30.0.214:8021
+          - 172.30.0.215:8021
+        labels:
+          group: freeswitch
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__address__]
+        regex: '(.+):\d+'
+        target_label: instance
+      - target_label: __address__
+        replacement: 172.30.0.212:9724
+      - source_labels: [instance]
+        regex: '172\.30\.0\.201'
+        target_label: server_name
+        replacement: 'WG0'
+      - source_labels: [instance]
+        regex: '172\.30\.0\.197'
+        target_label: server_name
+        replacement: 'Gate0'
+      - source_labels: [instance]
+        regex: '172\.30\.0\.207'
+        target_label: server_name
+        replacement: 'Kv Gate'
+      - source_labels: [instance]
+        regex: '172\.30\.0\.214'
+        target_label: server_name
+        replacement: 'Spas'
+      - source_labels: [instance]
+        regex: '172\.30\.0\.215'
+        target_label: server_name
+        replacement: 'Int Gate'
+
   - job_name: 'snmp'
     static_configs:
       - targets:

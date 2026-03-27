@@ -187,6 +187,8 @@ services:
       - GF_AUTH_TOKEN_ROTATION_INTERVAL_MINUTES=1440
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=internal"
@@ -239,6 +241,16 @@ services:
       - /dev/disk/:/dev/disk:ro
     networks:
       - internal
+
+  freeswitch-exporter:
+    build: ./freeswitch-exporter
+    container_name: freeswitch-exporter
+    restart: unless-stopped
+    logging: *default-logging
+    network_mode: host
+    environment:
+      - FREESWITCH_ESL_PASSWORD=${FREESWITCH_ESL_PASSWORD:-ClueCon}
+      - ESL_TIMEOUT=5
 
 volumes:
   traefik-data:
