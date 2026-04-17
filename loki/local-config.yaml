@@ -37,4 +37,5 @@ compactor:
   delete_request_store: filesystem
 
 limits_config:
-  retention_period: 336h
+  retention_period: 8760h
+  discover_log_levels: false

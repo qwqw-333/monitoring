@@ -1,0 +1,18 @@
+base-url: https://ntfy.2dep.duckdns.org
+upstream-base-url: https://ntfy.sh
+
+behind-proxy: true
+listen-http: :80
+
+cache-file: /var/cache/ntfy/cache.db
+cache-duration: "24h"
+
+auth-file: /var/lib/ntfy/user.db
+auth-default-access: deny-all
+
+attachment-cache-dir: /var/cache/ntfy/attachments
+attachment-total-size-limit: "100M"
+attachment-file-size-limit: "5M"
+
+log-level: info
+log-format: text

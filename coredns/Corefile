@@ -21,6 +21,7 @@
         172.30.0.212 traefik-dashboard.2dep.duckdns.org
         172.30.0.212 grafana.2dep.duckdns.org
         172.30.0.212 prometheus.2dep.duckdns.org
+        172.30.0.212 ntfy.2dep.duckdns.org
 	ttl 60
 	fallthrough
     }

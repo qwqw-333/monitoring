@@ -1,0 +1,455 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 16,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bf5pqynrt7uo0a"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "__name__"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "job"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "group"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "instance"
+            },
+            "properties": []
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Extension number"
+          }
+        ]
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bf5pqynrt7uo0a"
+          },
+          "editorMode": "code",
+          "expr": "freeswitch_registration_active{reg_user=\"$extension\"}",
+          "instant": true,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Extension $extension",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "freeswitch_registration_active": true,
+              "group": true,
+              "instance": true,
+              "job": true,
+              "realm": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 4,
+              "__name__": 6,
+              "freeswitch_registration_active": 5,
+              "group": 7,
+              "instance": 8,
+              "job": 9,
+              "network_ip": 1,
+              "realm": 2,
+              "reg_user": 0,
+              "server_name": 3
+            },
+            "renameByName": {
+              "network_ip": "Network IP",
+              "realm": "Realm",
+              "reg_user": "Extension number",
+              "server_name": "Server"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bf5pqynrt7uo0a"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+            "fillOpacity": 85,
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 0
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Kv UMZ" },
+            "properties": [{
+              "id": "thresholds",
+              "value": { "mode": "absolute", "steps": [
+                { "color": "transparent", "value": null },
+                { "color": "blue", "value": 1 }
+              ]}
+            }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Lv UMZ" },
+            "properties": [{
+              "id": "thresholds",
+              "value": { "mode": "absolute", "steps": [
+                { "color": "transparent", "value": null },
+                { "color": "green", "value": 1 }
+              ]}
+            }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Dn UMZ" },
+            "properties": [{
+              "id": "thresholds",
+              "value": { "mode": "absolute", "steps": [
+                { "color": "transparent", "value": null },
+                { "color": "orange", "value": 1 }
+              ]}
+            }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Od UMZ" },
+            "properties": [{
+              "id": "thresholds",
+              "value": { "mode": "absolute", "steps": [
+                { "color": "transparent", "value": null },
+                { "color": "purple", "value": 1 }
+              ]}
+            }]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "id": 3,
+      "options": {
+        "alignValue": "center",
+        "fillOpacity": 85,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "never",
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "bf5pqynrt7uo0a" },
+          "editorMode": "code",
+          "expr": "(sum by (server_name) (freeswitch_registration_active{reg_user=\"$extension\", server_name=~\"Kv UMZ|Lv UMZ|Dn UMZ|Od UMZ\"})) or (sum by (server_name) (freeswitch_registration_active{server_name=~\"Kv UMZ|Lv UMZ|Dn UMZ|Od UMZ\"}) * 0)",
+          "legendFormat": "{{server_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Registration Presence by Server",
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "cf6naos0w4h6ob"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Extension" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Event" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } },
+              { "id": "mappings", "value": [
+                { "type": "value", "options": {
+                  "migrate": { "text": "migrated", "color": "blue", "index": 0 },
+                  "register": { "text": "registered", "color": "green", "index": 1 },
+                  "offline": { "text": "offline", "color": "red", "index": 2 }
+                }}
+              ]}
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Server" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } },
+              { "id": "mappings", "value": [
+                { "type": "value", "options": {
+                  "Kv UMZ": { "text": "Kv UMZ", "color": "blue", "index": 0 },
+                  "Lv UMZ": { "text": "Lv UMZ", "color": "green", "index": 1 },
+                  "Dn UMZ": { "text": "Dn UMZ", "color": "orange", "index": 2 },
+                  "Od UMZ": { "text": "Od UMZ", "color": "purple", "index": 3 }
+                }}
+              ]}
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 22,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          { "desc": true, "displayName": "Time" }
+        ]
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "cf6naos0w4h6ob"
+          },
+          "editorMode": "code",
+          "expr": "{job=\"umz-events\", server=~\"$server\", event_type=~\"$event_type\"} | logfmt | extension=~\".*${extension}.*\"",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels",
+            "format": "kvp"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "id": true,
+              "tsNs": true,
+              "labels": true,
+              "labelTypes": true,
+              "Line": true,
+              "job": true,
+              "level": true,
+              "msg": true,
+              "ts": true,
+              "service_name": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "extension": 1,
+              "ip": 2,
+              "event_type": 3,
+              "server": 4,
+              "from": 5,
+              "to": 6
+            },
+            "renameByName": {
+              "extension": "Extension",
+              "event_type": "Event",
+              "server": "Server",
+              "from": "From",
+              "to": "To",
+              "ip": "IP"
+            }
+          }
+        }
+      ],
+      "title": "Registration Events",
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "value": ""
+        },
+        "label": "Extension",
+        "name": "extension",
+        "options": [],
+        "type": "textbox"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "cf6naos0w4h6ob"
+        },
+        "includeAll": true,
+        "label": "Server",
+        "multi": true,
+        "name": "server",
+        "options": [],
+        "query": { "label": "server", "stream": "{job=\"umz-events\"}", "type": 1 },
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "cf6naos0w4h6ob"
+        },
+        "includeAll": true,
+        "label": "Event",
+        "multi": true,
+        "name": "event_type",
+        "options": [],
+        "query": { "label": "event_type", "stream": "{job=\"umz-events\"}", "type": 1 },
+        "refresh": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "UMZ extentions",
+  "uid": "umz-registrations",
+  "version": 10
+}

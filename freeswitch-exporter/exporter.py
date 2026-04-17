@@ -274,6 +274,25 @@ def collect_gateways(esl: ESLClient, m: MetricsBuilder):
             pass
 
 
+def collect_registrations_detail(esl: ESLClient, m: MetricsBuilder):
+    raw = esl.command("api show registrations as json").strip()
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return
+    for row in data.get("rows", []):
+        reg_user = row.get("reg_user", "")
+        realm = row.get("realm", "")
+        network_ip = row.get("network_ip", "")
+        if reg_user:
+            m.gauge(
+                "freeswitch_registration_active",
+                "Extension registration presence (1=registered)",
+                1,
+                {"reg_user": reg_user, "realm": realm, "network_ip": network_ip},
+            )
+
+
 def collect_all(host: str, port: int, password: str) -> str:
     m = MetricsBuilder()
     start = time.monotonic()
@@ -286,6 +305,7 @@ def collect_all(host: str, port: int, password: str) -> str:
                 esl, m, "api show registrations count as json",
                 "freeswitch_registrations_active", "Number of active registrations",
             )
+            collect_registrations_detail(esl, m)
             collect_json_count(
                 esl, m, "api show channels count as json",
                 "freeswitch_channels_active", "Number of active channels",
