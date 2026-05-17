@@ -1,0 +1,12 @@
+scrape_interval: 15
+
+freeswitches:
+  - name: kv-gate
+    host: 10.5.100.207
+    port: 8021
+    password: ClueCon
+
+  - name: lv-gate
+    host: 10.5.101.207
+    port: 8021
+    password: ClueCon
