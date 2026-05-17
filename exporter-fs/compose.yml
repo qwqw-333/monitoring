@@ -1,22 +1,14 @@
 services:
-
   exporter:
-
     build:
       context: ./exporter
-
     container_name: freeswitch-exporter
-
     restart: always
-
     ports:
       - "9180:9180"
 
   detector:
-
     build:
       context: ./detector
-
     container_name: freeswitch-detector
-
     restart: always
