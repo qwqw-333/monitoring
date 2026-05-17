@@ -1,0 +1,13 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: ntfy
+    receivers:
+      - uid: ntfy-alerts
+        type: webhook
+        settings:
+          url: "http://ntfy:80/alerts?template=yes&title=%7B%7B.title%7D%7D&message=%7B%7B.message%7D%7D&priority=4&tags=grafana"
+          httpMethod: POST
+          username: admin
+          password: $NTFY_PASSWORD

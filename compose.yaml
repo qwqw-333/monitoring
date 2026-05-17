@@ -210,6 +210,7 @@ services:
       - GF_LOG_MODE=console
       - GF_LOG_LEVEL=error
       - GF_AUTH_TOKEN_ROTATION_INTERVAL_MINUTES=1440
+      - NTFY_PASSWORD=${NTFY_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
@@ -314,8 +315,29 @@ services:
     environment:
       - FREESWITCH_ESL_PASSWORD=${FREESWITCH_ESL_PASSWORD:-ClueCon}
       - LOKI_URL=http://localhost:3100/loki/api/v1/push
-      - POLL_INTERVAL=30
       - ESL_TIMEOUT=10
+      - MIGRATE_BUFFER_SECONDS=3
+      - MIGRATE_CONFIRM_SECONDS=300
+      - RECONNECT_DELAY=5
+      - RECONNECT_MAX_DELAY=60
+
+  fusionpbx-api-exporter:
+    build: ./fusionpbx-api-exporter
+    container_name: fusionpbx-api-exporter
+    restart: unless-stopped
+    logging: *default-logging
+    network_mode: host
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9725/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    environment:
+      - FUSIONPBX_API_TOKEN=${FUSIONPBX_API_TOKEN}
+      - FUSIONPBX_USER=${FUSIONPBX_USER:-admin}
+      - FUSIONPBX_PASSWORD=${FUSIONPBX_PASSWORD}
+      - API_TIMEOUT=15
 
   ntfy:
     image: binwiederhier/ntfy:v2.21.0
